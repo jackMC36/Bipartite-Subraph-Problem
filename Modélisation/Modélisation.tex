@@ -1,0 +1,88 @@
+\documentclass[11pt,a4paper]{article}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor} 
+\usepackage[most]{tcolorbox}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{relsize}
+
+\fancyhf{}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[R]{\small M1 INFO}
+
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[L]{ARP}
+\fancyfoot[R]{\thepage}
+
+\begin{document}
+
+\title{Algorithmique de résolution de problèmes: Bipartite-Subgraph Problem}
+\author{J. KOZIK}
+\date{03-12-2025}
+
+\maketitle
+
+\newpage
+
+\begin{flushleft}
+
+\section{Modélisation}
+
+
+\subsection{Etat}
+
+un etat décrit:
+\begin{itemize}
+\item[$\blacktriangleright$] Deux ensembles $X$ et $Y$ de sommets. 
+\end{itemize}
+
+\subsubsection{Etat initial}
+
+A l'état initial, les ensembles $X$ et $Y$ sont vides.
+
+\subsubsection{Successeur}
+
+Pour un état $e$:\\
+$succ(e,v,X) =e^{'}$ telle que on ajoute $v$ à $X$.
+
+\smallskip
+
+$succ(e,v,Y) =e^{'}$ telle que on ajoute $v$ à $Y$.
+
+
+
+
+\subsubsection{Etat valide}
+
+A tout moment, un état est valide si:
+\begin{itemize}
+\item[$\blacktriangleright$] $\forall v \in V$, $v$ appartient exclusivement à $X$ ou $Y$ ou à aucun des deux.
+\item[$\blacktriangleright$] le sous-graphe induit par $(X,E)$ forme un stable.
+\item[$\blacktriangleright$] le sous graphe induit par $(Y,E)$ forme un stable.
+\end{itemize}
+
+\subsubsection{Etat final}
+
+un état $e$ est final si:\\
+\begin{itemize}
+\item[$\blacktriangleright$]$X \cup Y = V$
+\item[$\blacktriangleright$] $e$ est un état valide.
+\end{itemize}
+
+\end{flushleft}
+\end{document}
+ 
