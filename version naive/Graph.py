@@ -28,7 +28,7 @@ class Graph:
     def get_edges(self) -> list[Tuple[int,int]]:
         return self.E
     
-    def get_neigbhors(self,s:int) -> List[int]:
+    def get_neighbors(self,s:int) -> List[int]:
         l = []
         for e in self.E:
             if s == e[0]:
@@ -36,6 +36,7 @@ class Graph:
             if s == e[1]:
                 l.append(e[0])
         return l
+    
     
     def txt_file_to_graph(self, fd: str) -> None:
         '''Lit un fichier texte et remplit les sommets et arêtes du graphe.'''
