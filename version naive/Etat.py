@@ -20,7 +20,7 @@ class Etat:
         self.E_r = E_r
 
     def __str__(self):
-        return "------------------------------\n"+"\n"+"Liste des sommets : " + self.G.get_vertices().__str__() + "\n"+ "Liste des aretes retenues: " + self.E_c.__str__() + "\n" +"------------------------------\n"
+        return "------------------------------\n"+"\n"+"Liste des sommets : " + self.G.get_vertices().__str__() + "\n"+ "Liste des aretes retenues: " + self.E_c.__str__() + "\n" + "Liste des aretes retirées: " + self.E_r.__str__() + "------------------------------\n"
 
     def get_V(self) -> List[int]:
         '''Retourne la liste des sommets.'''

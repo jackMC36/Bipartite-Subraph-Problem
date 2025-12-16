@@ -77,10 +77,10 @@ import os
 
 liste_solution = []
 G = Graph([],[])
-# Use absolute path to work from any directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(script_dir, "..", "Instances", "toy_model.txt")
+file_path = os.path.join(script_dir, "..", "Instances", "karate.txt")
 G.txt_file_to_graph(file_path)
+G.show()
 
 print(f"Graph loaded: {len(G.get_vertices())} vertices, {len(G.get_edges())} edges")
 print(f"Initial graph is bipartite: {Bipartite_Subgraph(G).is_bipartite(G)}")
@@ -102,9 +102,9 @@ for s in liste_solution:
 
 
 print("Nombre de solution:" + str(len(liste_solution)))
-
-
+new_G = Graph(result.get_V(),result.get_E_c())
+new_G.show()
 ##################################################################################################################################################################
 ##################################################################################################################################################################
 ##################################################################################################################################################################
-########################################################################################################toy_model_2##########################################################
+##################################################################################################################################################################
