@@ -47,42 +47,28 @@
 
 un etat décrit:
 \begin{itemize}
-\item[$\blacktriangleright$] Deux ensembles $X$ et $Y$ de sommets. 
+\item[$\blacktriangleright$] Deux ensembles $E_c$ (ensemble d'arêtes restantes) et $E_r$ (ensemble d'arêtes retirées).
 \end{itemize}
 
 \subsubsection{Etat initial}
 
-A l'état initial, les ensembles $X$ et $Y$ sont vides.
-
+A l'état initial, l'ensembles $E_c$ contient toutes les arêtes initiales, et $E_r$ est vide.
 \subsubsection{Successeur}
 
 Pour un état $e$:\\
-$succ(e,v,X) =e^{'}$ telle que on ajoute $v$ à $X$.
+$succ(Etat,e) =e^{'}$ telle que on ajoute $e$ à $E_r$ et on l'enlève de $E_c$.
 
 \smallskip
-
-$succ(e,v,Y) =e^{'}$ telle que on ajoute $v$ à $Y$.
-
 
 
 
 \subsubsection{Etat valide}
 
-A tout moment, un état est valide si:
-\begin{itemize}
-\item[$\blacktriangleright$] $\forall v \in V$, $v$ appartient exclusivement à $X$ ou $Y$ ou à aucun des deux.
-\item[$\blacktriangleright$] le sous-graphe induit par $(X,E)$ forme un stable.
-\item[$\blacktriangleright$] le sous graphe induit par $(Y,E)$ forme un stable.
-\end{itemize}
+A tout moment, un état est valide si il représente un sous-graphe du problème initial.
 
 \subsubsection{Etat final}
 
-un état $e$ est final si:\\
-\begin{itemize}
-\item[$\blacktriangleright$]$X \cup Y = V$
-\item[$\blacktriangleright$] $e$ est un état valide.
-\end{itemize}
-
+un état $e$ est final si le graphe $G_f = (V,E_c)$ obtenues est biparti. 
 \end{flushleft}
 \end{document}
  
