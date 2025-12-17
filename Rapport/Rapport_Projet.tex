@@ -1,0 +1,503 @@
+\documentclass[11pt,a4paper]{article}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor} 
+\usepackage[most]{tcolorbox}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{trees,graphs,graphdrawing}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{relsize}
+\usegdlibrary{force}
+
+
+\fancyhf{}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[R]{\small M1 INFO}
+
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[L]{ARP}
+\fancyfoot[R]{\thepage}
+
+\begin{document}
+
+\title{Algorithmique de résolution de problèmes: Bipartite-Subgraph Problem}
+\author{J. KOZIK}
+\date{03-12-2025}
+
+\maketitle
+
+\newpage
+
+\section{Introduction}
+
+Le \textbf{Bipartite Subgraph Problem} est un problème fondamental en algorithmique et en théorie des graphes. Il consiste à extraire, à partir d’un graphe général, un sous-graphe biparti optimisant un critère donné, le plus souvent le nombre d’arêtes conservées. Ce problème est intimement lié à la détection et à l'élimination des cycles impairs, qui caractérisent les graphes non bipartis.
+
+D’un point de vue algorithmique, le Bipartite Subgraph Problem est connu pour être NP-difficile.
+
+\section{Modélisation}
+
+\subsection{État}
+
+Un état est défini par deux ensembles d'arêtes :
+\begin{itemize}
+\item[$\blacktriangleright$] $E_c \subseteq E$, l'ensemble des arêtes conservées ;
+\item[$\blacktriangleright$] $E_r \subseteq E$, l'ensemble des arêtes retirées.
+\end{itemize}
+
+Ces ensembles vérifient les invariants suivants :
+
+$E_c \cup E_r = E \quad \text{et} \quad E_c \cap E_r = \varnothing.$
+
+
+\subsubsection{État initial}
+
+À l'état initial, toutes les arêtes sont conservées :
+
+$E_c = E \quad \text{et} \quad E_r = \varnothing.$
+
+
+\subsubsection{Successeur}
+
+Soit un état $s = (E_c, E_r)$ et une arête $e \in E_c$.  
+Le successeur $s'$ obtenu par le retrait de $e$ est défini par :
+
+$E_c' = E_c \setminus \{e\}, \quad E_r' = E_r \cup \{e\}.$
+
+\subsubsection{État valide}
+
+Tout état respectant les invariants précédents est considéré comme valide, car il représente un sous-graphe du graphe initial.
+
+\subsubsection{État final}
+
+Un état $s$ est final si le graphe induit $G_f = (V, E_c)$ est biparti, c’est-à-dire s'il ne contient aucun cycle impair.
+
+\newpage
+
+\section{Implémentations}
+
+Deux versions de l'algorithme de résolution du Bipartite Subgraph Problem ont été développé:\\
+
+La première version est une approche naîve. Elle explore exhaustivement l'ensemble des états possibles sans appliquer d'heuristiques ni de stratégies particulières. Chaque arête est considérée à chaque étape, ce qui conduit à un espace de recherche exponentiel.\\
+
+La seconde version intègre plusieurs améliorations destinées à réduire le temps de calcul. En particulier, j'ai introduit :\\
+\begin{itemize}
+\item[$\blacktriangleright$] Ignorer les arêtes « sortantes » (sticking-out edges) qui n'ont pas d'incidences dans un cycle impair, car elles ne peuvent jamais empêcher le graphe d'être biparti.
+\item[$\blacktriangleright$] Effectuer une vérification rapide de la bipartition à chaque état, en identifiant les arêtes « problématiques » dont les sommets sont assignés à la même couleur.
+\end{itemize}
+
+
+\bigskip
+
+Ces améliorations permettent à l'algorithme d’explorer plus efficacement l’espace des solutions et d'obtenir des résultats exacts sur des instances plus grandes, tout en restant conceptuellement basé sur le backtracking.
+\subsubsection{Vérification d'un état terminal}
+
+\begin{lstlisting}[language=Python, caption={Vérification de bipartition d’un graphe}]
+def is_bipartite(self, G: Graph):
+    color = {}
+
+    for v in G.get_vertices():
+        if v not in color:
+            queue = deque([v])
+            color[v] = 0
+            while queue:
+                u = queue.popleft()
+                for n in G.get_neighbors(u):
+                    if n not in color:
+                        color[n] = 1 - color[u]
+                        queue.append(n)
+                    elif color[n] == color[u]:
+                        return False
+    return True
+\end{lstlisting}
+
+Pour déterminer si un état est terminal, il suffit de vérifier si le sous-graphe actuel est biparti. Cette vérification est réalisée avec un parcours BFS.
+
+\subsection{Algorithme de backtracking}
+
+L'algorithme de backtracking explore récursivement le graphe des états afin de trouver un sous-graphe biparti. Si le graphe est biparti, l'état est immédiatement reconnu comme terminal et retourné comme solution.\\
+
+Dans le cas contraire, l'algorithme génère l’ensemble des actions possibles, correspondant au retrait des arêtes encore présentes. Pour chaque action, un nouvel état successeur est construit et exploré récursivement.\\ 
+\begin{itemize}
+\item[$\blacktriangleright$] Dès qu’une solution est trouvée, l'exploration s'interrompt.
+\item[$\blacktriangleright$]Si aucune action ne mène à un état terminal, l'algorithme retourne \texttt{None}, indiquant l'absence de solution sur la branche courante.
+
+\end{itemize}
+
+
+
+\begin{lstlisting}[language=Python, caption={Algorithme de backtracking}]
+def backtrack(self, assignment: Etat):
+    global liste_solution
+    G = Graph(assignment.get_V(), assignment.get_E_c())
+    if self.is_bipartite(G):
+        return assignment
+    
+    for edge in assignment.actions():
+        new_assignment = self.succ(assignment, edge)
+        result = self.backtrack(new_assignment)
+        if result is not None:
+            liste_solution.append(result)
+            return result
+    
+    return None            
+\end{lstlisting}
+
+\subsection{Version naive}
+
+\subsubsection{Actions}
+
+Une action correspond au retrait d’une arête du sous-graphe courant. Ainsi, à partir d'un état donné, l'ensemble des actions possibles est constitué des arêtes encore présentes dans $E_c$.
+
+\begin{lstlisting}[language=Python, caption={Ensemble des actions possibles}]
+def actions(self) -> List[Tuple[int,int]]:
+    return self.get_E_c()
+\end{lstlisting}
+
+
+\subsection{Version amélioré}
+
+\subsubsection{Amélioration par détection des arêtes problématiques}
+
+Dans la version améliorée de l'algorithme de backtracking, une tentative de deux-coloration est utilisée afin d’identifier rapidement les arêtes responsables des conflits de bipartition. Contrairement à une vérification complète de bipartition, cette tentative n'interrompt pas l'exploration en cas de conflit, mais fournit une coloration partielle ou potentiellement incorrecte du graphe.\\
+
+À partir de cette coloration, les arêtes dont les deux sommets se voient attribuer la même couleur sont identifiées comme \emph{arêtes problématiques}. Ces arêtes appartiennent nécessairement à au moins un cycle impair et constituent donc des candidates prioritaires pour le retrait.
+
+\begin{lstlisting}[language=Python, caption={Tentative de deux-coloration et détection des arêtes problématiques}]
+def tentative_deux_coloration(self):
+    color = {}
+    G = Graph(self.get_V(), self.get_E_c())
+
+    for v in G.get_vertices():
+        if v not in color:
+            queue = deque([v])
+            color[v] = 0
+            while queue:
+                u = queue.popleft()
+                for n in G.get_neighbors(u):
+                    if n not in color:
+                        color[n] = 1 - color[u]
+                        queue.append(n)
+    return color
+
+def get_problematic_edges(self):
+    l = []
+    coloration = self.tentative_deux_coloration()
+    for e in self.get_E_c():
+        u, v = e
+        if coloration[u] == coloration[v]:
+            l.append(e)
+    return l
+\end{lstlisting}
+
+\subsubsection{Ignorance des arêtes sortantes}
+
+Une autre amélioration apportée à l’algorithme de backtracking consiste à ignorer les \emph{arêtes sortantes} (\textit{sticking-out edges}), c’est-à-dire les arêtes incidentes à au moins un sommet de degré $1$. En effet, une telle arête ne peut appartenir à aucun cycle impair. Par conséquent, son retrait n’est jamais nécessaire pour rendre le graphe biparti.\\
+
+\begin{lstlisting}[language=Python, caption={Détection des arêtes sortantes}]
+def is_sticking_out_edge(self, uv: Tuple[int,int]) -> bool:
+    for s in uv:
+        if len(self.get_neighbors(s)) == 1:
+            return True
+    return False
+
+def get_sticking_out_edges(self) -> List[Tuple[int,int]]:
+    l = []
+    for e in self.get_edges():
+        if self.is_sticking_out_edge(e):
+            l.append(e)
+    return l
+\end{lstlisting}
+
+\subsubsection{Actions dans la version améliorée}
+
+Dans la version améliorée de l’algorithme, l’ensemble des actions possibles est restreint afin de guider plus efficacement la recherche. Plutôt que de considérer toutes les arêtes restantes, seules les arêtes identifiées comme \emph{problématiques} lors de la tentative de deux-coloration sont sélectionnées. Ces arêtes sont directement responsables des conflits de bipartition et leur retrait constitue donc un choix pertinent.\\
+
+De plus, les arêtes sortantes sont explicitement exclues de cet ensemble.
+
+\begin{lstlisting}[language=Python, caption={Ensemble des actions possibles – version améliorée}]
+def actions(self) -> List[Tuple[int,int]]:
+    l = []
+    sticking_out_edges = self.G.get_sticking_out_edges()
+    for e in self.get_problematic_edges():
+        if e not in sticking_out_edges:
+            l.append(e)
+    return l
+\end{lstlisting}
+
+\section{Instances}
+
+\subsection{Cas particulier: toy model}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[%
+    every node/.style={circle, draw, minimum size=8mm},
+    node distance=1.5cm
+]
+
+% Niveau 1
+\node (1) at (0,4) {1};
+
+% Niveau 2
+\node (2) at (-3,2) {2};
+\node (3) at (0,2) {3};
+\node (4) at (3,2) {4};
+
+% Niveau 3
+\node (5) at (-4,0) {5};
+\node (6) at (-1,0) {6};
+\node (7) at (2,0) {7};
+
+% Niveau 4
+\node (8) at (-3,-2) {8};
+\node (9) at (0,-2) {9};
+\node (10) at (3,-2) {10};
+
+% Niveau 5
+\node (11) at (0,-4) {11};
+
+% Arêtes
+\draw (1) -- (2);
+\draw (1) -- (3);
+\draw (1) -- (4);
+
+\draw (2) -- (5);
+\draw (3) -- (6);
+\draw (4) -- (7);
+
+\draw (5) -- (8);
+\draw (6) -- (9);
+\draw (7) -- (10);
+
+\draw (8) -- (11);
+\draw (9) -- (11);
+\draw (10) -- (11);
+
+\end{tikzpicture}
+\caption{Représentation du graphe étudié}
+\end{figure}
+
+Le graphe est biparti dès l'initialisation, donc aucune arête n'a besoin d'être enlevé. Par conséquent, l'algorithme s'arête dès l'état initial.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    every node/.style={circle, draw, minimum size=8mm},
+    blueNode/.style={fill=blue!30},
+    redNode/.style={fill=red!30}
+]
+
+% Niveau 1
+\node[blueNode] (1) at (0,4) {1};
+
+% Niveau 2
+\node[redNode] (2) at (-3,2) {2};
+\node[redNode] (3) at (0,2) {3};
+\node[redNode] (4) at (3,2) {4};
+
+% Niveau 3
+\node[blueNode] (5) at (-4,0) {5};
+\node[blueNode] (6) at (-1,0) {6};
+\node[blueNode] (7) at (2,0) {7};
+
+% Niveau 4
+\node[redNode] (8) at (-3,-2) {8};
+\node[redNode] (9) at (0,-2) {9};
+\node[redNode] (10) at (3,-2) {10};
+
+% Niveau 5
+\node[blueNode] (11) at (0,-4) {11};
+
+% Arêtes
+\draw (1) -- (2);
+\draw (1) -- (3);
+\draw (1) -- (4);
+
+\draw (2) -- (5);
+\draw (3) -- (6);
+\draw (4) -- (7);
+
+\draw (5) -- (8);
+\draw (6) -- (9);
+\draw (7) -- (10);
+
+\draw (8) -- (11);
+\draw (9) -- (11);
+\draw (10) -- (11);
+
+\end{tikzpicture}
+\caption{Deux-coloration du graphe (graphe biparti)}
+\end{figure}
+
+\newpage
+
+\subsection{Karate}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    every node/.style={circle, draw, minimum size=5mm, font=\scriptsize},
+    scale=1
+]
+
+% Placement circulaire des sommets
+\foreach \i in {1,...,34} {
+    \node (v\i) at ({360/34*\i}:5cm) {\i};
+}
+
+\draw (v1)--(v2)--(v3)--(v1);
+\draw (v1)--(v4)--(v2);
+\draw (v1)--(v5);
+\draw (v1)--(v6);
+\draw (v1)--(v7);
+\draw (v1)--(v8);
+\draw (v1)--(v9);
+\draw (v1)--(v11);
+\draw (v1)--(v12);
+\draw (v1)--(v13);
+\draw (v1)--(v14);
+\draw (v1)--(v18);
+\draw (v1)--(v20);
+\draw (v1)--(v22);
+\draw (v1)--(v32);
+
+\draw (v2)--(v3);
+\draw (v2)--(v4);
+\draw (v2)--(v8);
+\draw (v2)--(v14);
+\draw (v2)--(v18);
+\draw (v2)--(v20);
+\draw (v2)--(v22);
+\draw (v2)--(v31);
+
+\draw (v3)--(v4);
+\draw (v3)--(v8);
+\draw (v3)--(v9);
+\draw (v3)--(v10);
+\draw (v3)--(v14);
+\draw (v3)--(v28);
+\draw (v3)--(v29);
+\draw (v3)--(v33);
+
+\draw (v4)--(v8);
+\draw (v4)--(v13);
+\draw (v4)--(v14);
+
+\draw (v5)--(v7);
+\draw (v5)--(v11);
+
+\draw (v6)--(v7);
+\draw (v6)--(v11);
+\draw (v6)--(v17);
+
+\draw (v7)--(v17);
+
+\draw (v9)--(v31);
+\draw (v9)--(v33);
+\draw (v9)--(v34);
+
+\draw (v10)--(v34);
+
+\draw (v14)--(v34);
+
+\draw (v15)--(v33);
+\draw (v15)--(v34);
+
+\draw (v16)--(v33);
+\draw (v16)--(v34);
+
+\draw (v18)--(v1);
+\draw (v18)--(v2);
+
+\draw (v19)--(v33);
+\draw (v19)--(v34);
+
+\draw (v20)--(v1);
+\draw (v20)--(v2);
+\draw (v20)--(v34);
+
+\draw (v21)--(v33);
+\draw (v21)--(v34);
+
+\draw (v22)--(v1);
+\draw (v22)--(v2);
+
+\draw (v23)--(v33);
+\draw (v23)--(v34);
+
+\draw (v24)--(v26);
+\draw (v24)--(v28);
+\draw (v24)--(v30);
+\draw (v24)--(v33);
+\draw (v24)--(v34);
+
+\draw (v25)--(v26);
+\draw (v25)--(v28);
+\draw (v25)--(v32);
+
+\draw (v26)--(v32);
+
+\draw (v27)--(v30);
+\draw (v27)--(v34);
+
+\draw (v28)--(v32);
+\draw (v28)--(v34);
+
+\draw (v29)--(v33);
+\draw (v29)--(v34);
+
+\draw (v30)--(v33);
+\draw (v30)--(v34);
+
+\draw (v31)--(v33);
+\draw (v31)--(v34);
+
+\draw (v32)--(v33);
+\draw (v32)--(v34);
+
+\draw (v33)--(v34);
+
+\end{tikzpicture}
+\caption{Représentation du graphe à 34 sommets}
+\end{figure}
+
+\subsubsection{Résultats – Version naïve}
+
+Cette approche explore exhaustivement toutes les combinaisons possibles d'arêtes à retirer afin d'obtenir un sous-graphe biparti, sans appliquer d'heuristiques particulières ni d'élagage.
+
+\begin{itemize}
+    \item \textbf{Nombre d'arêtes retirées :} 57
+    \item \textbf{Nombre de solutions trouvées :} 58
+\end{itemize}
+
+Comme attendu, la version naïve explore l'ensemble de l'espace des états, ce qui entraîne un nombre important de solutions et un coût computationnel élevé, particulièrement pour des graphes de cette taille. Cette observation justifie l'introduction de la version 66666améliorée avec heuristiques et élagages.
+
+\subsection{Résultats – Version améliorée}
+
+La version améliorée de l'algorithme de backtracking utilise les heuristiques décrites précédemment, notamment la détection des arêtes problématiques et l'ignorance des arêtes sortantes. Ces améliorations permettent de réduire le facteur de branchement et de guider la recherche vers les suppressions les plus pertinentes.
+
+\begin{itemize}
+    \item \textbf{Nombre d'arêtes retirées :} 28
+    \item \textbf{Nombre de solutions trouvées :} 29
+\end{itemize}
+
+Grâce à ces heuristiques, la version améliorée réduit de manière significative le nombre d'arêtes retirées et le nombre de solutions explorées par rapport à la version naïve. Cela illustre l'efficacité des stratégies de détection des arêtes problématiques et de filtrage des arêtes sortantes.
+
+\subsection{Conclusion}
+
+L'étude comparative des deux versions de l'algorithme de backtracking montre que les heuristiques introduites dans la version améliorée permettent de réduire significativement le nombre d'arêtes retirées et le nombre de solutions explorées. En ciblant les arêtes problématiques et en ignorant les arêtes sortantes, l'algorithme devient plus efficace tout en conservant sa complétude.
+
+
+\end{document}
+

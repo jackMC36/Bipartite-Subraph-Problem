@@ -38,37 +38,43 @@
 
 \newpage
 
-\begin{flushleft}
-
 \section{Modélisation}
 
+\subsection{État}
 
-\subsection{Etat}
-
-un etat décrit:
+Un état est défini par deux ensembles d’arêtes :
 \begin{itemize}
-\item[$\blacktriangleright$] Deux ensembles $E_c$ (ensemble d'arêtes restantes) et $E_r$ (ensemble d'arêtes retirées).
+\item[$\blacktriangleright$] $E_c \subseteq E$, l’ensemble des arêtes conservées ;
+\item[$\blacktriangleright$] $E_r \subseteq E$, l’ensemble des arêtes retirées.
 \end{itemize}
 
-\subsubsection{Etat initial}
+Ces ensembles vérifient les invariants suivants :
 
-A l'état initial, l'ensembles $E_c$ contient toutes les arêtes initiales, et $E_r$ est vide.
+$E_c \cup E_r = E \quad \text{et} \quad E_c \cap E_r = \varnothing.$
+
+
+\subsubsection{État initial}
+
+À l’état initial, toutes les arêtes sont conservées :
+
+$E_c = E \quad \text{et} \quad E_r = \varnothing.$
+
+
 \subsubsection{Successeur}
 
-Pour un état $e$:\\
-$succ(Etat,e) =e^{'}$ telle que on ajoute $e$ à $E_r$ et on l'enlève de $E_c$.
+Soit un état $s = (E_c, E_r)$ et une arête $e \in E_c$.  
+Le successeur $s'$ obtenu par le retrait de $e$ est défini par :
 
-\smallskip
+$E_c' = E_c \setminus \{e\}, \quad E_r' = E_r \cup \{e\}.$
+
+\subsubsection{État valide}
+
+Tout état respectant les invariants précédents est considéré comme valide, car il représente un sous-graphe du graphe initial.
+
+\subsubsection{État final}
+
+Un état $s$ est final si le graphe induit $G_f = (V, E_c)$ est biparti, c’est-à-dire s’il ne contient aucun cycle impair.
 
 
-
-\subsubsection{Etat valide}
-
-A tout moment, un état est valide si il représente un sous-graphe du problème initial.
-
-\subsubsection{Etat final}
-
-un état $e$ est final si le graphe $G_f = (V,E_c)$ obtenues est biparti. 
-\end{flushleft}
 \end{document}
  
