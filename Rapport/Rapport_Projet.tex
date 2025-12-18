@@ -236,6 +236,22 @@ def actions(self) -> List[Tuple[int,int]]:
     return l
 \end{lstlisting}
 
+\section{Analyse de la compléxité}
+
+\subsection{Version naîve}
+
+Dans le pire des cas, la version naïve possède un degré de branchement égal à $m = |E|$ et une profondeur maximale de $m-1$, puisqu'il peut être nécessaire de retirer jusqu'à $m-1$ arêtes pour rendre le graphe biparti. L'arbre de recherche peut alors contenir jusqu'à $O(m^{m})$ nœuds, ce qui correspond à la complexité spatiale de l'algorithme dans le pire des cas.
+
+
+\subsection{Version améliorée}
+
+Dans la version améliorée de l'algorithme, l'ensemble des actions possibles est restreint aux arêtes impliquées dans des conflits de bipartition, identifiées à l'aide d'une tentative de deux-coloration. Le degré de branchement n'est donc plus égal à $m$, mais à $k$, où $k$ désigne le nombre d'arêtes problématiques non sortantes, avec généralement $k \ll m$.\\
+
+La profondeur maximale de l'arbre de recherche reste bornée par $m-1$, puisqu'une solution peut toujours nécessiter le retrait de plusieurs arêtes. Toutefois, la réduction du degré de branchement entraîne une diminution significative du nombre de nœuds explorés. Dans le pire des cas, l'arbre de recherche contient $O(k^{m})$ nœuds, ce qui constitue une amélioration exponentielle par rapport à la version naïve.\\
+
+Bien que cette borne corresponde toujours au pire des cas théorique, la valeur de $k$ est en pratique très inférieure à $m$, car seules les arêtes appartenant à des cycles impairs sont considérées, ce qui réduit considérablement l'espace de recherche.
+
+
 \section{Instances}
 
 \subsection{Cas particulier: toy model}
